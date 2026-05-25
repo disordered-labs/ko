@@ -1,0 +1,85 @@
+# relwithdebinfo = moderate optimization, debugging symbols, use packages in ../lib
+
+# ---------------------------------------------------------------------------- #
+# compiler/linker/library settings
+
+CPPFLAGS	= -MD
+
+CXX		= g++
+CXXFLAGS	= -std=c++23 -O2 -g
+
+LD		= $(CXX)
+LDFLAGS		= $(CXXFLAGS)
+
+AR		= ar
+ARFLAGS		= -rc
+
+SHFLAGS		= -fPIC
+SHLIBFLAGS	= -shared -rdynamic
+
+ifeq ($(shell uname),Darwin)
+  RPATH_NAME	= -install_name @rpath/$(SHLIB)
+  RPATH_DIRS	= -Wl,-rpath,@loader_path \
+		  -Wl,-rpath,@loader_path/../lib \
+		  -Wl,-rpath,@executable_path \
+		  -Wl,-rpath,@executable_path/../lib
+else
+  RPATH_NAME	=
+  RPATH_DIRS	= -Wl,-rpath,\$$ORIGIN
+		  -Wl,-rpath,\$$ORIGIN/../lib
+endif
+
+# ---------------------------------------------------------------------------- #
+# external libraries
+
+FFT_PATH	= ../../lib/fftw3/fftw3
+FFT_INC		=
+FFT_LIB		=
+
+BLAS_PATH	= ../../lib/lapack/lapack
+BLAS_INC	=
+BLAS_LIB	=
+
+LAPACK_PATH	= ../../lib/lapack/lapack
+LAPACK_INC	=
+LAPACK_LIB	=
+
+SCALAPACK_PATH	= ../../lib/scalapack/scalapack
+SCALAPACK_INC	=
+SCALAPACK_LIB	=
+
+# ---------------------------------------------------------------------------- #
+# build rules and dependencies
+# do not edit this section
+
+EXTRA_INC	= $(SCALAPACK_INC) $(LAPACK_INC) $(BLAS_INC) $(FFT_INC)
+EXTRA_LIB	= $(SCALAPACK_LIB) $(LAPACK_LIB) $(BLAS_LIB) $(FFT_LIB)
+
+# path to src files
+
+vpath		%.cxx ..
+vpath		%.h ..
+
+# compilation rules
+
+%.o		: %.cxx
+		$(CXX) $(CXXFLAGS) $(SHFLAGS) $(CPPFLAGS) $(EXTRA_INC) -c $<
+
+# link target
+
+$(EXE)		: $(OBJ) $(LIB)
+		$(LD) $(LDFLAGS) $(RPATH_DIRS) $(OBJ) $(LIBLINK) $(EXTRA_LIB) -o $@
+
+# library targets
+
+$(ARLIB)	: $(OBJ)
+		$(AR) $(ARFLAGS) $(ARLIB) $(OBJ)
+
+$(SHLIB)	: $(OBJ)
+		$(CXX) $(CXXFLAGS) $(SHFLAGS) $(SHLIBFLAGS) $(RPATH_NAME) -o $(SHLIB) $(OBJ) $(EXTRA_LIB)
+
+# dependencies
+
+-include $(OBJ:.o=.d)
+
+# ---------------------------------------------------------------------------- #
