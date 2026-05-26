@@ -4,30 +4,22 @@
    See the README file in the top-level directory.
 ----------------------------------------------------------------------------- */
 
-#ifndef KO_H
-#define KO_H
-
-#include "input.h"
-
-#include <memory>
+#ifndef INPUT_H
+#define INPUT_H
 
 namespace KO_NS {
 
-class KO {
+class Input {
 
   public:
 
-    std::unique_ptr<Input> input;
+    Input();
 
   public:
 
-    KO(int, char **);
+    void file();
 
-  private:
-
-    void help(char *);
-
-}; // class KO
+}; // class Input
 } // namespace KO_NS
 
 #endif

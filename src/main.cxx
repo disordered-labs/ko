@@ -21,7 +21,7 @@ int main(int argc, char **argv)
 {
   try {
     auto ko = std::make_unique<KO>(argc, argv);
-    //
+    ko->input->file();
   } catch (std::exception &mesg) {
     fprintf(stdout, "\nERROR: The following exception has occured\n%s\n",
             mesg.what());
