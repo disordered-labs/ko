@@ -1,9 +1,11 @@
-# Ignore everything ...
+# Ignore everything --------- #
 
-# ...
+/*
+/*/
 
-# ... except these
+# Except these -------------- #
 
-# ...
+!.gitignore
+!/man/
 
-# ---
+# --------------------------- #
