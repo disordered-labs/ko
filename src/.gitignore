@@ -1,9 +1,15 @@
-# Ignore everything ...
+# Ignore everything --------- #
 
-# ...
+/*
+/*/
 
-# ... except these
+# Except these -------------- #
 
-# ...
+!.clang-format
+!.gitignore
+!*.cxx
+!*.h
+!/MAKE/
+!Makefile
 
-# ---
+# --------------------------- #
