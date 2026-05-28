@@ -9,6 +9,10 @@
 #include "error.h"
 #include "macros.h"
 
+#include <format>
+#include <regex>
+#include <string>
+
 // -------------------------------------------------------------------------- //
 
 using namespace KO_NS;
@@ -23,8 +27,27 @@ using namespace KO_NS;
 
 // -------------------------------------------------------------------------- //
 
-Input::Input()
+Input::Input(int argc, char **argv)
 {
+  std::string arg;
+  int iarg, shift;
+
+  // Process command-line arguments
+
+  iarg = 1;
+  while (iarg < argc) {
+    arg = argv[iarg];
+    if (std::regex_match(arg, std::regex("-{1,2}i(n(put)?)?"))) {
+      shift = 2;
+      if (iarg + shift > argc) {
+        error->fatal(FLERR, "Invalid command-line argument");
+      }
+      input_file = argv[iarg+1];
+      iarg += shift;
+    } else {
+      iarg += 1;
+    }
+  }
 }
 
 // -------------------------------------------------------------------------- //
@@ -34,8 +57,26 @@ Input::Input()
    Public functions
    -------------------------------------------------------------------------- */
 
+
+// -------------------------------------------------------------------------- //
+
 void Input::file()
 {
+  //
+
+  stream.open(input_file);
+  if (!stream.is_open()) {
+    error->fatal(FLERR, std::format(R"(Could not open the file "{}")", input_file));
+  }
+
+  //
+
+  while (std::getline(stream, line)) {
+  }
+
+  //
+
+  stream.close();
 }
 
 // -------------------------------------------------------------------------- //

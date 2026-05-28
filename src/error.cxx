@@ -38,6 +38,9 @@ Error::Error()
    Public functions
    -------------------------------------------------------------------------- */
 
+
+// -------------------------------------------------------------------------- //
+
 void Error::fatal(const std::string &file, int line, const std::string &string)
 {
   std::string mesg = std::format("\nERROR: {} ({}:{})\n", string, basename(file), line);

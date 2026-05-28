@@ -31,21 +31,28 @@ KO::KO(int argc, char **argv)
 {
   std::string arg;
   int iarg, shift;
-  int input_flag;
+  int help_flag, input_flag;
 
   //
 
   error = std::make_unique<Error>();
-  input = std::make_unique<Input>();
 
   // Process command-line arguments
 
+  help_flag = 0;
   input_flag = 0;
 
   iarg = 1;
   while (iarg < argc) {
     arg = argv[iarg];
-    if (std::regex_match(arg, std::regex("-{1,2}i(n(put)?)?"))) {
+    if (std::regex_match(arg, std::regex("-{1,2}h(elp)?"))) {
+      shift = 1;
+      if (iarg + shift > argc) {
+        error->fatal(FLERR, "Invalid command-line argument");
+      }
+      help_flag = iarg + 1;
+      iarg += shift;
+    } else if (std::regex_match(arg, std::regex("-{1,2}i(n(put)?)?"))) {
       shift = 2;
       if (iarg + shift > argc) {
         error->fatal(FLERR, "Invalid command-line argument");
@@ -57,7 +64,20 @@ KO::KO(int argc, char **argv)
     }
   }
 
-  //input = std::make_unique<Input>();
+  //
+
+  if (help_flag) {
+    //help();
+    //error->done();
+  }
+
+  //
+
+  if (input_flag) {
+    input = std::make_unique<Input>(argc, argv);
+  } else {
+    error->fatal(FLERR, "The --input command-line option was not found");
+  }
 }
 
 // -------------------------------------------------------------------------- //
