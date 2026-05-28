@@ -4,13 +4,13 @@
    See the README file in the top-level directory.
 ----------------------------------------------------------------------------- */
 
-#include "ko.h"
-
 #include "error.h"
+
 #include "macros.h"
 
-#include <memory>
-#include <regex>
+#include <cstdio>
+#include <format>
+#include <print>
 #include <string>
 
 // -------------------------------------------------------------------------- //
@@ -27,37 +27,8 @@ using namespace KO_NS;
 
 // -------------------------------------------------------------------------- //
 
-KO::KO(int argc, char **argv)
+Error::Error()
 {
-  std::string arg;
-  int iarg, shift;
-  int input_flag;
-
-  //
-
-  error = std::make_unique<Error>();
-  input = std::make_unique<Input>();
-
-  // Process command-line arguments
-
-  input_flag = 0;
-
-  iarg = 1;
-  while (iarg < argc) {
-    arg = argv[iarg];
-    if (std::regex_match(arg, std::regex("-{1,2}i(n(put)?)?"))) {
-      shift = 2;
-      if (iarg + shift > argc) {
-        error->fatal(FLERR, "Invalid command-line argument");
-      }
-      input_flag = iarg + 1;
-      iarg += shift;
-    } else {
-      error->fatal(FLERR, "Invalid command-line argument");
-    }
-  }
-
-  //input = std::make_unique<Input>();
 }
 
 // -------------------------------------------------------------------------- //
@@ -67,6 +38,14 @@ KO::KO(int argc, char **argv)
    Public functions
    -------------------------------------------------------------------------- */
 
+void Error::fatal(const std::string &file, int line, const std::string &string)
+{
+  std::string mesg = std::format("\nERROR: {} ({}:{})\n", string, basename(file), line);
+
+  std::print("{}", mesg);
+
+  exit(EXIT_FAILURE);
+}
 
 // -------------------------------------------------------------------------- //
 
@@ -78,8 +57,16 @@ KO::KO(int argc, char **argv)
 
 // -------------------------------------------------------------------------- //
 
-void KO::help(char *exename)
+std::string Error::basename(const std::string &path)
 {
+  std::size_t found;
+
+  found = path.find("src/");
+  if (found != std::string::npos) {
+    return path.substr(found);
+  } else {
+    return path;
+  }
 }
 
 // -------------------------------------------------------------------------- //

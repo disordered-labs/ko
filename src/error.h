@@ -4,24 +4,30 @@
    See the README file in the top-level directory.
 ----------------------------------------------------------------------------- */
 
-#ifndef INPUT_H
-#define INPUT_H
+#ifndef ERROR_H
+#define ERROR_H
 
 #include <memory>
+#include <string>
 
 namespace KO_NS {
 
-class Input {
+class Error {
 
   public:
 
-    Input();
+    Error();
 
   public:
 
-    void file();
+    [[noreturn]] void fatal(const std::string &, int, const std::string &);
 
-}; // class Input
+  private:
+
+    std::string basename(const std::string &);
+
+}; // class Error
+inline std::unique_ptr<Error> error;
 } // namespace KO_NS
 
 #endif
