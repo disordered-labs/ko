@@ -17,17 +17,30 @@ class Input {
 
   public:
 
-    Input(int, char **);
+  Input(int, char **);
 
   public:
 
-    void file();
+  void file();
 
   private:
 
-    std::ifstream stream;
-    std::string input_file;
-    std::string line;
+  int echo_console;
+  int echo_logfile;
+
+  std::ifstream stream;
+  std::string input_file;
+  std::string line;
+
+  int narg;
+  std::string args;
+
+  void execute_command();
+  void parse();
+  void trim_comments();
+  void trim_whitespace();
+  void echo();
+  void boundary();
 
 }; // class Input
 } // namespace KO_NS

@@ -4,30 +4,31 @@
    See the README file in the top-level directory.
 ----------------------------------------------------------------------------- */
 
-#ifndef KO_H
-#define KO_H
+#ifndef UNIVERSE_H
+#define UNIVERSE_H
 
-#include "input.h"
-
+#include <cstdio>
 #include <memory>
 
 namespace KO_NS {
 
-class KO {
+class Universe {
 
   public:
 
-  std::unique_ptr<Input> input;
+  Universe();
 
   public:
 
-  KO(int, char **);
+  FILE *console;
+  FILE *logfile;
 
   private:
 
-  void help(char *);
+  int omp_num_threads;
 
-}; // class KO
+}; // class Universe
+inline std::unique_ptr<Universe> universe;
 } // namespace KO_NS
 
 #endif

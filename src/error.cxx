@@ -7,6 +7,7 @@
 #include "error.h"
 
 #include "macros.h"
+#include "universe.h"
 
 #include <cstdio>
 #include <format>
@@ -41,11 +42,36 @@ Error::Error()
 
 // -------------------------------------------------------------------------- //
 
+void Error::done(int status)
+{
+  if (universe->console != stdout) {
+    fclose(universe->console);
+  }
+
+  if (universe->logfile) {
+    fclose(universe->logfile);
+  }
+
+  exit(status);
+}
+
+// -------------------------------------------------------------------------- //
+
 void Error::fatal(const std::string &file, int line, const std::string &string)
 {
   std::string mesg = std::format("\nERROR: {} ({}:{})\n", string, basename(file), line);
 
-  std::print("{}", mesg);
+  if (universe->console) {
+    std::print(universe->console, "{}", mesg);
+    if (universe->console != stdout) {
+      fclose(universe->console);
+    }
+  }
+
+  if (universe->logfile) {
+    std::print(universe->logfile, "{}", mesg);
+    fclose(universe->logfile);
+  }
 
   exit(EXIT_FAILURE);
 }
