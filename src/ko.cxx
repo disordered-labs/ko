@@ -9,6 +9,7 @@
 #include "error.h"
 #include "macros.h"
 #include "universe.h"
+#include "version.h"
 
 #include <format>
 #include <memory>
@@ -147,7 +148,7 @@ KO::KO(int argc, char **argv)
 
   // Startup messages
 
-  mesg = std::format("KO ({})\n", "XXX");
+  mesg = std::format("KO ({})\n", KO_VERSION);
 
   if (universe->console) {
     std::print(universe->console, "{}", mesg);
