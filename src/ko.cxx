@@ -167,11 +167,10 @@ KO::KO(int argc, char **argv)
 
   // Initialize the input class
 
-  if (input_flag) {
-    input = std::make_unique<Input>(argc, argv);
-  } else {
+  if (!input_flag) {
     error->fatal(FLERR, "The --input command-line option was not found");
   }
+  input = std::make_unique<Input>(argc, argv);
 }
 
 // -------------------------------------------------------------------------- //

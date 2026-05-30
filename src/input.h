@@ -7,7 +7,6 @@
 #ifndef INPUT_H
 #define INPUT_H
 
-#include <fstream>
 #include <memory>
 #include <string>
 
@@ -17,30 +16,34 @@ class Input {
 
   public:
 
-  Input(int, char **);
+    Input(int, char **);
 
   public:
 
-  void file();
+    void file();
 
   private:
 
-  int echo_console;
-  int echo_logfile;
+    const std::string comments = "!#$";
+    const std::string whitespace = " \t\f\v\n\r";
 
-  std::ifstream stream;
-  std::string input_file;
-  std::string line;
+    std::string input_file;
+    std::string args;
 
-  int narg;
-  std::string args;
+    int narg;
+    int echo_console;
+    int echo_logfile;
 
-  void execute_command();
-  void parse();
-  void trim_comments();
-  void trim_whitespace();
-  void echo();
-  void boundary();
+    void trim_comments(std::string &);
+    void trim_whitespace(std::string &);
+
+    void parse();
+    void execute_command();
+
+  private:
+
+    void boundary();
+    void echo();
 
 }; // class Input
 } // namespace KO_NS

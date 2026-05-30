@@ -10,7 +10,9 @@
 #include "macros.h"
 #include "universe.h"
 
+#include <algorithm>
 #include <format>
+#include <fstream>
 #include <print>
 #include <regex>
 #include <string>
@@ -33,7 +35,6 @@ Input::Input(int argc, char **argv)
 {
   std::string arg;
   int iarg, shift;
-  int echo_flag;
 
   // Default parameter values
 
@@ -73,6 +74,9 @@ Input::Input(int argc, char **argv)
 
 void Input::file()
 {
+  std::ifstream stream;
+  std::string line, next_line;
+
   // Open the input file
 
   stream.open(input_file);
@@ -84,9 +88,24 @@ void Input::file()
 
   while (std::getline(stream, line)) {
 
-    // If line ends in '&', append next line
+    // Trim comments and whitespace
 
-    // ...
+    trim_comments(line);
+    trim_whitespace(line);
+
+    if (line.empty()) continue;
+
+    // Append the next line if the current line ends in '&'
+
+    while (!line.empty() && line.back() == '&') {
+      line.pop_back();
+      if (!std::getline(stream, next_line)) {
+        break;
+      }
+      trim_comments(next_line);
+      trim_whitespace(next_line);
+      line.append(" ").append(next_line);
+    }
 
     // Echo the line
 
@@ -96,6 +115,12 @@ void Input::file()
 
     if (echo_logfile && universe->logfile) {
       std::print(universe->logfile, "{}\n", line);
+    }
+
+    // Sanity check line syntax before parsing
+
+    if (std::ranges::count(line, '&') > 0) {
+      error->fatal(FLERR, "Too many line continuations");
     }
 
     // Parse the line
@@ -122,6 +147,58 @@ void Input::file()
 
 // -------------------------------------------------------------------------- //
 
+void Input::trim_comments(std::string &string)
+{
+  size_t pos = string.find_first_of(comments);
+
+  if (pos != std::string::npos) {
+    string.erase(pos);
+  }
+}
+
+// -------------------------------------------------------------------------- //
+
+void Input::trim_whitespace(std::string &string)
+{
+  size_t beg = string.find_first_not_of(whitespace);
+  size_t end = string.find_last_not_of(whitespace);
+
+  if (beg != std::string::npos && end != std::string::npos) {
+    string.erase(0,beg);
+    string.erase(end-beg+1);
+  } else {
+    string.clear();
+  }
+}
+
+// -------------------------------------------------------------------------- //
+
+void Input::parse()
+{
+}
+
+// -------------------------------------------------------------------------- //
+
+void Input::execute_command()
+{
+}
+
+// -------------------------------------------------------------------------- //
+
+
+// -------------------------------------------------------------------------- //
+// -------------------------------------------------------------------------- //
+// -------------------------------------------------------------------------- //
+
+
+// -------------------------------------------------------------------------- //
+
+void Input::boundary()
+{
+}
+
+// -------------------------------------------------------------------------- //
+
 void Input::echo()
 {
   if (narg != 1) {
@@ -143,44 +220,6 @@ void Input::echo()
   } else {
     error->fatal(FLERR, std::format(R"(Unknown echo keyword "{}")", args));
   }
-}
-
-// -------------------------------------------------------------------------- //
-
-void Input::execute_command()
-{
-}
-
-// -------------------------------------------------------------------------- //
-
-void Input::parse()
-{
-}
-
-// -------------------------------------------------------------------------- //
-
-void Input::trim_comments()
-{
-}
-
-// -------------------------------------------------------------------------- //
-
-void Input::trim_whitespace()
-{
-}
-
-// -------------------------------------------------------------------------- //
-
-
-// -------------------------------------------------------------------------- //
-// -------------------------------------------------------------------------- //
-// -------------------------------------------------------------------------- //
-
-
-// -------------------------------------------------------------------------- //
-
-void Input::boundary()
-{
 }
 
 // -------------------------------------------------------------------------- //

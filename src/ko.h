@@ -17,15 +17,15 @@ class KO {
 
   public:
 
-  std::unique_ptr<Input> input;
+    std::unique_ptr<Input> input;
 
   public:
 
-  KO(int, char **);
+    KO(int, char **);
 
   private:
 
-  void help(char *);
+    void help(char *);
 
 }; // class KO
 } // namespace KO_NS
