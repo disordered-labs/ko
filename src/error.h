@@ -16,16 +16,16 @@ class Error {
 
   public:
 
-  Error();
+    Error();
 
   public:
 
-  [[noreturn]] void done(int);
-  [[noreturn]] void fatal(const std::string &, int, const std::string &);
+    [[noreturn]] void done(int);
+    [[noreturn]] void fatal(const std::string &, int, const std::string &);
 
   private:
 
-  std::string basename(const std::string &);
+    std::string basename(const std::string &);
 
 }; // class Error
 inline std::unique_ptr<Error> error;

@@ -9,6 +9,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 namespace KO_NS {
 
@@ -28,22 +29,25 @@ class Input {
     const std::string whitespace = " \t\f\v\n\r";
 
     std::string input_file;
-    std::string args;
+    std::string command;
+    std::vector<std::string> args;
 
-    int narg;
     int echo_console;
     int echo_logfile;
 
     void trim_comments(std::string &);
     void trim_whitespace(std::string &);
 
-    void parse();
+    void parse(std::string &);
     void execute_command();
 
   private:
 
-    void boundary();
     void echo();
+    void boundary();
+    void material();
+    void mesh();
+    void variable();
 
 }; // class Input
 } // namespace KO_NS

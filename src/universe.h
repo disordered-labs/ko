@@ -9,6 +9,7 @@
 
 #include <cstdio>
 #include <memory>
+#include <string>
 
 namespace KO_NS {
 
@@ -22,6 +23,12 @@ class Universe {
 
   FILE *console;
   FILE *logfile;
+
+  void set_console(std::string);
+  void set_logfile(std::string);
+
+  std::string console_default;
+  std::string logfile_default;
 
   private:
 

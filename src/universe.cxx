@@ -6,9 +6,13 @@
 
 #include "universe.h"
 
+#include "error.h"
 #include "macros.h"
 
 #include <cstdio>
+#include <format>
+#include <regex>
+#include <string>
 
 #if defined(_OPENMP)
 #include <omp.h>
@@ -31,6 +35,9 @@ using namespace KO_NS;
 Universe::Universe()
 {
   // Initialize output file handles
+
+  console_default = "stdout";
+  logfile_default = "ko.log";
 
   console = stdout;
   logfile = nullptr;
@@ -56,6 +63,45 @@ Universe::Universe()
    Public functions
    -------------------------------------------------------------------------- */
 
+
+// -------------------------------------------------------------------------- //
+
+void Universe::set_console(std::string arg)
+{
+  if (std::regex_match(arg, std::regex(console_default))) {
+    console = stdout;
+  } else {
+    if (std::regex_match(arg, std::regex("none"))) {
+      console = nullptr;
+    } else {
+      console = fopen(arg.c_str(), "w");
+      if (console == nullptr) {
+        error->fatal(FLERR, std::format("Could not open the console {}", arg));
+      }
+    }
+  }
+}
+
+// -------------------------------------------------------------------------- //
+
+void Universe::set_logfile(std::string arg)
+{
+  if (std::regex_match(arg, std::regex(logfile_default))) {
+    logfile = fopen(arg.c_str(), "w");
+    if (logfile == nullptr) {
+      error->fatal(FLERR, std::format("Could not open the log file {}", arg));
+    }
+  } else {
+    if (std::regex_match(arg, std::regex("none"))) {
+      logfile = nullptr;
+    } else {
+      logfile = fopen(arg.c_str(), "w");
+      if (logfile == nullptr) {
+        error->fatal(FLERR, std::format("Could not open the log file {}", arg));
+      }
+    }
+  }
+}
 
 // -------------------------------------------------------------------------- //
 

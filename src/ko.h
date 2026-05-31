@@ -10,6 +10,7 @@
 #include "input.h"
 
 #include <memory>
+#include <string_view>
 
 namespace KO_NS {
 
@@ -25,7 +26,7 @@ class KO {
 
   private:
 
-    void help(char *);
+    void help(std::string_view);
 
 }; // class KO
 } // namespace KO_NS

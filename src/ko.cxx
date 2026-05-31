@@ -11,11 +11,13 @@
 #include "universe.h"
 #include "version.h"
 
+#include <cstdlib>
 #include <format>
 #include <memory>
 #include <print>
 #include <regex>
 #include <string>
+#include <string_view>
 
 // -------------------------------------------------------------------------- //
 
@@ -35,21 +37,20 @@ KO::KO(int argc, char **argv)
 {
   std::string arg, mesg;
   int iarg, shift;
-  int console_flag, echo_flag, help_flag, input_flag, logfile_flag, nobuffer_flag;
+  int console_flag, echo_flag, help_flag, input_flag, logfile_flag;
 
   // Initialize fundamental classes
 
   error = std::make_unique<Error>();
   universe = std::make_unique<Universe>();
 
-  // Process command-line arguments
+  // Process command-line arguments with error checking
 
   console_flag = 0;
   echo_flag = 0;
   help_flag = 0;
   input_flag = 0;
   logfile_flag = 0;
-  nobuffer_flag = 0;
 
   iarg = 1;
   while (iarg < argc) {
@@ -75,78 +76,46 @@ KO::KO(int argc, char **argv)
       }
       help_flag = 1;
       iarg += shift;
-    } else if (std::regex_match(arg, std::regex("-{1,2}i(n(put)?)?"))) {
+    } else if (std::regex_match(arg, std::regex("-{1,2}i(nput)?"))) {
       shift = 2;
       if (iarg + shift > argc) {
         error->fatal(FLERR, "Invalid command-line argument");
       }
       input_flag = iarg + 1;
       iarg += shift;
-    } else if (std::regex_match(arg, std::regex("-{1,2}l(og(file)?)?"))) {
+    } else if (std::regex_match(arg, std::regex("-{1,2}l(ogfile)?"))) {
       shift = 2;
       if (iarg + shift > argc) {
         error->fatal(FLERR, "Invalid command-line argument");
       }
       logfile_flag = iarg + 1;
       iarg += shift;
-    } else if (std::regex_match(arg, std::regex("--no-buffer"))) {
-      shift = 1;
-      if (iarg + shift > argc) {
-        error->fatal(FLERR, "Invalid command-line argument");
-      }
-      nobuffer_flag = 1;
-      iarg += shift;
     } else {
       error->fatal(FLERR, "Invalid command-line argument");
     }
   }
 
-  // Configure the console and logfile
+  // Post-processing configuration
 
-  if (!console_flag) {
-    universe->console = stdout;
+  if (console_flag) {
+    universe->set_console(argv[console_flag]);
   } else {
-    arg = argv[console_flag];
-    if (std::regex_match(arg, std::regex("none"))) {
-      universe->console = nullptr;
-    } else {
-      universe->console = fopen(arg.c_str(), "w");
-      if (universe->console == nullptr) {
-        error->fatal(FLERR, std::format("Could not open the console file {}", arg));
-      }
-    }
+    universe->set_console(universe->console_default);
   }
 
-  if (!logfile_flag) {
-    arg = "ko.log";
-    universe->logfile = fopen(arg.c_str(), "w");
-    if (universe->logfile == nullptr) {
-      error->fatal(FLERR, std::format("Could not open the log file {}", arg));
-    }
+  if (logfile_flag) {
+    universe->set_logfile(argv[logfile_flag]);
   } else {
-    arg = argv[logfile_flag];
-    if (std::regex_match(arg, std::regex("none"))) {
-      universe->logfile = nullptr;
-    } else {
-      universe->logfile = fopen(arg.c_str(), "w");
-      if (universe->logfile == nullptr) {
-        error->fatal(FLERR, std::format("Could not open the log file {}", arg));
-      }
-    }
+    universe->set_logfile(universe->logfile_default);
   }
 
-  // Configure the console and logfile for unbuffered output
-
-  if (nobuffer_flag) {
-    if (universe->console) {
-      setbuf(universe->console, nullptr);
-    }
-    if (universe->logfile) {
-      setbuf(universe->logfile, nullptr);
-    }
+  if ((!input_flag) && (!help_flag)) {
+    error->fatal(FLERR, "The --input command-line option was not found");
+  } else {
+    input = std::make_unique<Input>(argc, argv);
   }
 
-  // Startup messages
+  // Startup information to console and logfile
 
   mesg = std::format("KO ({})\n", KO_VERSION);
 
@@ -164,13 +133,6 @@ KO::KO(int argc, char **argv)
     help(argv[0]);
     error->done(EXIT_SUCCESS);
   }
-
-  // Initialize the input class
-
-  if (!input_flag) {
-    error->fatal(FLERR, "The --input command-line option was not found");
-  }
-  input = std::make_unique<Input>(argc, argv);
 }
 
 // -------------------------------------------------------------------------- //
@@ -191,8 +153,23 @@ KO::KO(int argc, char **argv)
 
 // -------------------------------------------------------------------------- //
 
-void KO::help(char *exename)
+void KO::help(std::string_view exename)
 {
+  std::string mesg = std::format(
+  "\nKO - Computer Simulation of Dynamic Phenomena\n\n"
+  "General usage:\n\n"
+  "  {} --input <filename> [options]\n\n"
+  "Usage example:\n\n"
+  "  {} --input ko.inp\n\n"
+  "List of command-line options:\n\n"
+  "  -c, --console <none/filename>           : where to send console output (default: stdout)\n"
+  "  -e, --echo <both/console/logfile/none>  : echoing of input script (default: logfile)\n"
+  "  -h, --help                              : print this help message\n"
+  "  -i, --input <filename>                  : read input from filename (no default)\n"
+  "  -l, --logfile <none/filename>           : where to send logfile output (default: ko.log)\n"
+  "\n", exename, exename);
+
+  std::print(universe->console, "{}", mesg);
 }
 
 // -------------------------------------------------------------------------- //

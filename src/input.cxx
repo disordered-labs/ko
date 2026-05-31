@@ -15,6 +15,7 @@
 #include <fstream>
 #include <print>
 #include <regex>
+#include <sstream>
 #include <string>
 
 // -------------------------------------------------------------------------- //
@@ -48,11 +49,12 @@ Input::Input(int argc, char **argv)
     arg = argv[iarg];
     if (std::regex_match(arg, std::regex("-{1,2}e(cho)?"))) {
       shift = 2;
-      narg = 1;
-      args = argv[iarg+1];
+      args.clear();
+      args.push_back(argv[iarg+1]);
       echo();
+      args.clear();
       iarg += shift;
-    } else if (std::regex_match(arg, std::regex("-{1,2}i(n(put)?)?"))) {
+    } else if (std::regex_match(arg, std::regex("-{1,2}i(nput)?"))) {
       shift = 2;
       input_file = argv[iarg+1];
       iarg += shift;
@@ -81,14 +83,14 @@ void Input::file()
 
   stream.open(input_file);
   if (!stream.is_open()) {
-    error->fatal(FLERR, std::format(R"(Could not open the file "{}")", input_file));
+    error->fatal(FLERR, std::format(R"(Could not open the input file "{}")", input_file));
   }
 
   // Process input file contents
 
   while (std::getline(stream, line)) {
 
-    // Trim comments and whitespace
+    // Trim comments and whitespace, skip to the next line if empty
 
     trim_comments(line);
     trim_whitespace(line);
@@ -117,15 +119,10 @@ void Input::file()
       std::print(universe->logfile, "{}\n", line);
     }
 
-    // Sanity check line syntax before parsing
+    // Parse the line, skip to the next line if empty
 
-    if (std::ranges::count(line, '&') > 0) {
-      error->fatal(FLERR, "Too many line continuations");
-    }
-
-    // Parse the line
-
-    parse();
+    parse(line);
+    if (command.empty()) continue;
 
     // Execute the command
 
@@ -147,40 +144,59 @@ void Input::file()
 
 // -------------------------------------------------------------------------- //
 
-void Input::trim_comments(std::string &string)
+void Input::trim_comments(std::string &line)
 {
-  size_t pos = string.find_first_of(comments);
+  size_t pos = line.find_first_of(comments);
 
   if (pos != std::string::npos) {
-    string.erase(pos);
+    line.erase(pos);
   }
 }
 
 // -------------------------------------------------------------------------- //
 
-void Input::trim_whitespace(std::string &string)
+void Input::trim_whitespace(std::string &line)
 {
-  size_t beg = string.find_first_not_of(whitespace);
-  size_t end = string.find_last_not_of(whitespace);
+  size_t beg = line.find_first_not_of(whitespace);
+  size_t end = line.find_last_not_of(whitespace);
 
   if (beg != std::string::npos && end != std::string::npos) {
-    string.erase(0,beg);
-    string.erase(end-beg+1);
+    line.erase(0,beg);
+    line.erase(end-beg+1);
   } else {
-    string.clear();
+    line.clear();
   }
 }
 
 // -------------------------------------------------------------------------- //
 
-void Input::parse()
+void Input::parse(std::string &line)
 {
+  std::string token;
+  std::stringstream stream(line);
+
+  command.clear();
+  args.clear();
+
+  if (stream >> command) {
+    while (stream >> token) {
+      args.push_back(token);
+    }
+  } else {
+    error->fatal(FLERR, std::format(R"(Could not parse the line "{}")", line));
+  }
 }
 
 // -------------------------------------------------------------------------- //
 
 void Input::execute_command()
 {
+  if (command == "boundary") boundary();
+  else if (command == "echo") echo();
+  else if (command == "material") material();
+  else if (command == "mesh") mesh();
+  else if (command == "variable") variable();
+  else error->fatal(FLERR, std::format(R"(Unknown command "{}")", command));
 }
 
 // -------------------------------------------------------------------------- //
@@ -201,25 +217,43 @@ void Input::boundary()
 
 void Input::echo()
 {
-  if (narg != 1) {
-    error->fatal(FLERR, "Too many args");
+  if (args.size() != 1) {
+    error->fatal(FLERR, "Echo command expects exactly one argument");
   }
 
-  if (args == "both") {
+  if (args[0] == "both") {
     echo_console = 1;
     echo_logfile = 1;
-  } else if (args == "console") {
+  } else if (args[0] == "console") {
     echo_console = 1;
     echo_logfile = 0;
-  } else if (args == "logfile") {
+  } else if (args[0] == "logfile") {
     echo_console = 0;
     echo_logfile = 1;
-  } else if (args == "none") {
+  } else if (args[0] == "none") {
     echo_console = 0;
     echo_logfile = 0;
   } else {
-    error->fatal(FLERR, std::format(R"(Unknown echo keyword "{}")", args));
+    error->fatal(FLERR, std::format(R"(Unknown echo keyword "{}")", args[0]));
   }
+}
+
+// -------------------------------------------------------------------------- //
+
+void Input::mesh()
+{
+}
+
+// -------------------------------------------------------------------------- //
+
+void Input::material()
+{
+}
+
+// -------------------------------------------------------------------------- //
+
+void Input::variable()
+{
 }
 
 // -------------------------------------------------------------------------- //
