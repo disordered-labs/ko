@@ -17,22 +17,22 @@ class Universe {
 
   public:
 
-  Universe();
+    Universe();
 
   public:
 
-  FILE *console;
-  FILE *logfile;
+    std::string console_default;
+    std::string logfile_default;
 
-  void set_console(std::string);
-  void set_logfile(std::string);
+    FILE *console;
+    FILE *logfile;
 
-  std::string console_default;
-  std::string logfile_default;
+    void set_console(std::string);
+    void set_logfile(std::string);
 
   private:
 
-  int omp_num_threads;
+    int omp_num_threads;
 
 }; // class Universe
 inline std::unique_ptr<Universe> universe;
