@@ -171,7 +171,9 @@ auto KO::help(std::string_view exename) -> void
   "  -l, --logfile <none/filename>           : where to send logfile output (default: ko.log)\n"
   "\n", exename);
 
-  std::print(universe->console, "{}", message);
+  if (universe->console) {
+    std::print(universe->console, "{}", message);
+  }
 }
 
 // -------------------------------------------------------------------------- //
