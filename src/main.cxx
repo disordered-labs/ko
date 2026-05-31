@@ -6,10 +6,10 @@
 
 #include "ko.h"
 
-#include <cstdio>
 #include <cstdlib>
 #include <exception>
 #include <memory>
+#include <print>
 
 // -------------------------------------------------------------------------- //
 
@@ -23,8 +23,7 @@ int main(int argc, char **argv)
     auto ko = std::make_unique<KO>(argc, argv);
     ko->input->file();
   } catch (std::exception &mesg) {
-    fprintf(stdout, "\nERROR: The following exception has occured\n%s\n",
-            mesg.what());
+    std::print(stdout, "\nERROR: The following exception has occured\n{}\n", mesg.what());
     return EXIT_FAILURE;
   }
   return EXIT_SUCCESS;
