@@ -12,7 +12,6 @@
 #include <cstdlib>
 #include <cstdio>
 #include <format>
-#include <regex>
 #include <string>
 
 #if defined(_OPENMP)
@@ -35,10 +34,12 @@ using namespace KO_NS;
 
 Universe::Universe()
 {
-  // Initialize output file handles
+  // Default output file handles
 
   console_default = "stdout";
   logfile_default = "ko.log";
+
+  // Initialize output file handles
 
   console = stdout;
   logfile = nullptr;
@@ -67,17 +68,17 @@ Universe::Universe()
 
 // -------------------------------------------------------------------------- //
 
-void Universe::set_console(std::string arg)
+auto Universe::set_console(std::string value) -> void
 {
-  if (std::regex_match(arg, std::regex(console_default))) {
+  if (value == console_default) {
     console = stdout;
   } else {
-    if (std::regex_match(arg, std::regex("none"))) {
+    if (value == "none") {
       console = nullptr;
     } else {
-      console = fopen(arg.c_str(), "w");
+      console = fopen(value.c_str(), "w");
       if (console == nullptr) {
-        error->fatal(FLERR, std::format("Could not open the console {}", arg));
+        error->fatal(FLERR, std::format("Could not open the console {}", value));
       }
     }
   }
@@ -85,20 +86,20 @@ void Universe::set_console(std::string arg)
 
 // -------------------------------------------------------------------------- //
 
-void Universe::set_logfile(std::string arg)
+auto Universe::set_logfile(std::string value) -> void
 {
-  if (std::regex_match(arg, std::regex(logfile_default))) {
-    logfile = fopen(arg.c_str(), "w");
+  if (value == logfile_default) {
+    logfile = fopen(value.c_str(), "w");
     if (logfile == nullptr) {
-      error->fatal(FLERR, std::format("Could not open the log file {}", arg));
+      error->fatal(FLERR, std::format("Could not open the log file {}", value));
     }
   } else {
-    if (std::regex_match(arg, std::regex("none"))) {
+    if (value == "none") {
       logfile = nullptr;
     } else {
-      logfile = fopen(arg.c_str(), "w");
+      logfile = fopen(value.c_str(), "w");
       if (logfile == nullptr) {
-        error->fatal(FLERR, std::format("Could not open the log file {}", arg));
+        error->fatal(FLERR, std::format("Could not open the log file {}", value));
       }
     }
   }

@@ -27,8 +27,8 @@ class Universe {
     FILE *console;
     FILE *logfile;
 
-    void set_console(std::string);
-    void set_logfile(std::string);
+    auto set_console(std::string) -> void;
+    auto set_logfile(std::string) -> void;
 
   private:
 
