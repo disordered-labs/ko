@@ -35,7 +35,8 @@ using namespace KO_NS;
 
 KO::KO(int argc, char **argv)
 {
-  std::string option, message;
+  std::string message;
+  std::string_view option;
   int iarg, shift;
   int console_flag, echo_flag, help_flag, input_flag, logfile_flag;
 
@@ -110,7 +111,7 @@ KO::KO(int argc, char **argv)
     universe->set_logfile(universe->logfile_default);
   }
 
-  if ((!input_flag) && (!help_flag)) {
+  if (!input_flag && !help_flag) {
     error->fatal(FLERR, "The --input command-line option was not found");
   } else {
     input = std::make_unique<Input>(argc, argv);

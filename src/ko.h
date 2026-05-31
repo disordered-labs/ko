@@ -26,7 +26,7 @@ class KO {
 
   private:
 
-    void help(std::string_view);
+    auto help(std::string_view) -> void;
 
 }; // class KO
 } // namespace KO_NS
