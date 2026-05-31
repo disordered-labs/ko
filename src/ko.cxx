@@ -155,7 +155,7 @@ KO::KO(int argc, char **argv)
 
 // -------------------------------------------------------------------------- //
 
-void KO::help(std::string_view exename)
+auto KO::help(std::string_view exename) -> void
 {
   std::string mesg = std::format(
   "\nKO - Computer Simulation of Dynamic Phenomena\n\n"
