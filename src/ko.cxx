@@ -16,7 +16,6 @@
 #include <format>
 #include <memory>
 #include <print>
-#include <regex>
 #include <string>
 #include <string_view>
 
@@ -36,7 +35,7 @@ using namespace KO_NS;
 
 KO::KO(int argc, char **argv)
 {
-  std::string arg, mesg;
+  std::string option, message;
   int iarg, shift;
   int console_flag, echo_flag, help_flag, input_flag, logfile_flag;
 
@@ -56,36 +55,36 @@ KO::KO(int argc, char **argv)
 
   iarg = 1;
   while (iarg < argc) {
-    arg = argv[iarg];
-    if (std::regex_match(arg, std::regex("-{1,2}c(onsole)?"))) {
+    option = argv[iarg];
+    if (option == "-c" || option == "--console") {
       shift = 2;
       if (iarg + shift > argc) {
         error->fatal(FLERR, "Invalid command-line argument");
       }
       console_flag = iarg + 1;
       iarg += shift;
-    } else if (std::regex_match(arg, std::regex("-{1,2}e(cho)?"))) {
+    } else if (option == "-e" || option == "--echo") {
       shift = 2;
       if (iarg + shift > argc) {
         error->fatal(FLERR, "Invalid command-line argument");
       }
       echo_flag = iarg + 1;
       iarg += shift;
-    } else if (std::regex_match(arg, std::regex("-{1,2}h(elp)?"))) {
+    } else if (option == "-h" || option == "--help") {
       shift = 1;
       if (iarg + shift > argc) {
         error->fatal(FLERR, "Invalid command-line argument");
       }
       help_flag = 1;
       iarg += shift;
-    } else if (std::regex_match(arg, std::regex("-{1,2}i(nput)?"))) {
+    } else if (option == "-i" || option == "--input") {
       shift = 2;
       if (iarg + shift > argc) {
         error->fatal(FLERR, "Invalid command-line argument");
       }
       input_flag = iarg + 1;
       iarg += shift;
-    } else if (std::regex_match(arg, std::regex("-{1,2}l(ogfile)?"))) {
+    } else if (option == "-l" || option == "--logfile") {
       shift = 2;
       if (iarg + shift > argc) {
         error->fatal(FLERR, "Invalid command-line argument");
@@ -119,14 +118,14 @@ KO::KO(int argc, char **argv)
 
   // Startup information to console and logfile
 
-  mesg = std::format("KO ({})\n", KO_VERSION);
+  message = std::format("KO ({})\n", KO_VERSION);
 
   if (universe->console) {
-    std::print(universe->console, "{}", mesg);
+    std::print(universe->console, "{}", message);
   }
 
   if (universe->logfile) {
-    std::print(universe->logfile, "{}", mesg);
+    std::print(universe->logfile, "{}", message);
   }
 
   // If help_flag is set, print help message and exit with success status
@@ -157,7 +156,7 @@ KO::KO(int argc, char **argv)
 
 auto KO::help(std::string_view exename) -> void
 {
-  std::string mesg = std::format(
+  std::string message = std::format(
   "\nKO - Computer Simulation of Dynamic Phenomena\n\n"
   "General usage:\n\n"
   "  {0} --input <filename> [options]\n\n"
@@ -171,7 +170,7 @@ auto KO::help(std::string_view exename) -> void
   "  -l, --logfile <none/filename>           : where to send logfile output (default: ko.log)\n"
   "\n", exename);
 
-  std::print(universe->console, "{}", mesg);
+  std::print(universe->console, "{}", message);
 }
 
 // -------------------------------------------------------------------------- //
