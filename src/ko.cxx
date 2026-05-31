@@ -160,16 +160,16 @@ auto KO::help(std::string_view exename) -> void
   std::string mesg = std::format(
   "\nKO - Computer Simulation of Dynamic Phenomena\n\n"
   "General usage:\n\n"
-  "  {} --input <filename> [options]\n\n"
+  "  {0} --input <filename> [options]\n\n"
   "Usage example:\n\n"
-  "  {} --input ko.inp\n\n"
+  "  {0} --input ko.inp\n\n"
   "List of command-line options:\n\n"
   "  -c, --console <none/filename>           : where to send console output (default: stdout)\n"
   "  -e, --echo <both/console/logfile/none>  : echoing of input script (default: logfile)\n"
   "  -h, --help                              : print this help message\n"
   "  -i, --input <filename>                  : read input from filename (no default)\n"
   "  -l, --logfile <none/filename>           : where to send logfile output (default: ko.log)\n"
-  "\n", exename, exename);
+  "\n", exename);
 
   std::print(universe->console, "{}", mesg);
 }
