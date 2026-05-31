@@ -10,7 +10,6 @@
 #include "macros.h"
 #include "universe.h"
 
-#include <algorithm>
 #include <format>
 #include <fstream>
 #include <print>

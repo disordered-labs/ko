@@ -4,17 +4,31 @@
    See the README file in the top-level directory.
 ----------------------------------------------------------------------------- */
 
-#ifndef MACROS_H
-#define MACROS_H
+#ifndef MEMORY_H
+#define MEMORY_H
+
+#include <memory>
 
 namespace KO_NS {
 
-// Source location
+class Memory {
 
-#define FLERR __FILE__, __LINE__
+  public:
 
+    Memory();
+
+  public:
+
+    // ...
+
+  private:
+
+    // ...
+
+}; // class Memory
+inline std::unique_ptr<Memory> memory;
 } // namespace KO_NS
 
 #endif
 
-/* -------------------------------------------------------------------------- */
+// -------------------------------------------------------------------------- //

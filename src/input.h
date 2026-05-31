@@ -7,7 +7,6 @@
 #ifndef INPUT_H
 #define INPUT_H
 
-#include <memory>
 #include <string>
 #include <vector>
 
@@ -29,6 +28,7 @@ class Input {
     const std::string whitespace = " \t\f\v\n\r";
 
     std::string input_file;
+
     std::string command;
     std::vector<std::string> args;
 

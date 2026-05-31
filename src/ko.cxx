@@ -8,6 +8,7 @@
 
 #include "error.h"
 #include "macros.h"
+#include "memory.h"
 #include "universe.h"
 #include "version.h"
 
@@ -41,6 +42,7 @@ KO::KO(int argc, char **argv)
 
   // Initialize fundamental classes
 
+  memory = std::make_unique<Memory>();
   error = std::make_unique<Error>();
   universe = std::make_unique<Universe>();
 
