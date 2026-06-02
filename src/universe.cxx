@@ -9,8 +9,8 @@
 #include "error.h"
 #include "macros.h"
 
-#include <cstdlib>
 #include <cstdio>
+#include <cstdlib>
 #include <format>
 #include <string>
 
