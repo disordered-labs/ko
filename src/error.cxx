@@ -9,10 +9,12 @@
 #include "macros.h"
 #include "universe.h"
 
+#include <cstdlib>
 #include <cstdio>
 #include <format>
 #include <print>
 #include <string>
+#include <string_view>
 
 // -------------------------------------------------------------------------- //
 
@@ -28,7 +30,7 @@ using namespace KO_NS;
 
 // -------------------------------------------------------------------------- //
 
-Error::Error() {}
+Error::Error() : numwarn(0), maxwarn(100) {}
 
 // -------------------------------------------------------------------------- //
 
@@ -40,38 +42,66 @@ Error::Error() {}
 
 // -------------------------------------------------------------------------- //
 
-void Error::done(int status)
+auto Error::done(int status) -> void
 {
-  if (universe->console != stdout) {
+  if ((universe->console) && (universe->console != stdout)) {
     fclose(universe->console);
   }
-
   if (universe->logfile) {
     fclose(universe->logfile);
   }
-
-  exit(status);
+  std::exit(status);
 }
 
 // -------------------------------------------------------------------------- //
 
-void Error::fatal(const std::string &file, int line, const std::string &string)
+auto Error::fatal(std::string_view path, int line, std::string_view memo) -> void
 {
-  std::string mesg = std::format("\nERROR: {} ({}:{})\n", string, basename(file), line);
+  std::string message = std::format("\nERROR: {} ({}:{})\n",
+                                    memo, basename(path), line);
 
   if (universe->console) {
-    std::print(universe->console, "{}", mesg);
+    std::print(universe->console, "{}", message);
     if (universe->console != stdout) {
       fclose(universe->console);
     }
   }
-
   if (universe->logfile) {
-    std::print(universe->logfile, "{}", mesg);
+    std::print(universe->logfile, "{}", message);
     fclose(universe->logfile);
   }
+  std::exit(EXIT_FAILURE);
+}
 
-  exit(EXIT_FAILURE);
+// -------------------------------------------------------------------------- //
+
+auto Error::warn(std::string_view path, int line, std::string_view memo) -> void
+{
+  numwarn += 1;
+  if ((maxwarn > 0) && (numwarn > maxwarn)) {
+    return;
+  }
+
+  std::string message = std::format("WARNING: {} ({}:{})\n",
+                                    memo, basename(path), line);
+
+  if (universe->console) {
+    std::print(universe->console, "{}", message);
+  }
+  if (universe->logfile) {
+    std::print(universe->logfile, "{}", message);
+  }
+
+  if ((maxwarn > 0) && (numwarn == maxwarn)) {
+    std::string note = "WARNING: Maximum warning count reached. "
+                       "Further warnings will be suppressed.\n";
+    if (universe->console) {
+      std::print(universe->console, "{}", note);
+    }
+    if (universe->logfile) {
+      std::print(universe->logfile, "{}", note);
+    }
+  }
 }
 
 // -------------------------------------------------------------------------- //
@@ -84,12 +114,11 @@ void Error::fatal(const std::string &file, int line, const std::string &string)
 
 // -------------------------------------------------------------------------- //
 
-std::string Error::basename(const std::string &path)
+auto Error::basename(std::string_view path) -> std::string_view
 {
-  std::size_t found;
+  auto found = path.find("src/");
 
-  found = path.find("src/");
-  if (found != std::string::npos) {
+  if (found != std::string_view::npos) {
     return path.substr(found);
   } else {
     return path;
