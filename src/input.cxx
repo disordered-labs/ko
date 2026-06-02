@@ -13,7 +13,6 @@
 #include <format>
 #include <fstream>
 #include <print>
-#include <regex>
 #include <sstream>
 #include <string>
 
@@ -33,7 +32,7 @@ using namespace KO_NS;
 
 Input::Input(int argc, char **argv)
 {
-  std::string arg;
+  std::string option;
   int iarg, shift;
 
   // Default parameter values
@@ -45,15 +44,15 @@ Input::Input(int argc, char **argv)
 
   iarg = 1;
   while (iarg < argc) {
-    arg = argv[iarg];
-    if (std::regex_match(arg, std::regex("-{1,2}e(cho)?"))) {
+    option = argv[iarg];
+    if (option == "-e" || option == "--echo") {
       shift = 2;
       args.clear();
       args.push_back(argv[iarg+1]);
       echo();
       args.clear();
       iarg += shift;
-    } else if (std::regex_match(arg, std::regex("-{1,2}i(nput)?"))) {
+    } else if (option == "-i" || option == "--input") {
       shift = 2;
       input_file = argv[iarg+1];
       iarg += shift;
@@ -73,7 +72,7 @@ Input::Input(int argc, char **argv)
 
 // -------------------------------------------------------------------------- //
 
-void Input::file()
+auto Input::file() -> void
 {
   std::ifstream stream;
   std::string line, next_line;
@@ -143,7 +142,7 @@ void Input::file()
 
 // -------------------------------------------------------------------------- //
 
-void Input::trim_comments(std::string &line)
+auto Input::trim_comments(std::string &line) -> void
 {
   size_t pos = line.find_first_of(comments);
 
@@ -154,7 +153,7 @@ void Input::trim_comments(std::string &line)
 
 // -------------------------------------------------------------------------- //
 
-void Input::trim_whitespace(std::string &line)
+auto Input::trim_whitespace(std::string &line) -> void
 {
   size_t beg = line.find_first_not_of(whitespace);
   size_t end = line.find_last_not_of(whitespace);
@@ -169,7 +168,7 @@ void Input::trim_whitespace(std::string &line)
 
 // -------------------------------------------------------------------------- //
 
-void Input::parse(std::string &line)
+auto Input::parse(std::string &line) -> void
 {
   std::string token;
   std::stringstream stream(line);
@@ -188,10 +187,11 @@ void Input::parse(std::string &line)
 
 // -------------------------------------------------------------------------- //
 
-void Input::execute_command()
+auto Input::execute_command() -> void
 {
   if (command == "boundary") boundary();
   else if (command == "echo") echo();
+  else if (command == "error") echo();
   else if (command == "material") material();
   else if (command == "mesh") mesh();
   else if (command == "variable") variable();
@@ -208,13 +208,13 @@ void Input::execute_command()
 
 // -------------------------------------------------------------------------- //
 
-void Input::boundary()
+auto Input::boundary() -> void
 {
 }
 
 // -------------------------------------------------------------------------- //
 
-void Input::echo()
+auto Input::echo() -> void
 {
   if (args.size() != 1) {
     error->fatal(FLERR, "Echo command expects exactly one argument");
@@ -239,19 +239,19 @@ void Input::echo()
 
 // -------------------------------------------------------------------------- //
 
-void Input::mesh()
+auto Input::mesh() -> void
 {
 }
 
 // -------------------------------------------------------------------------- //
 
-void Input::material()
+auto Input::material() -> void
 {
 }
 
 // -------------------------------------------------------------------------- //
 
-void Input::variable()
+auto Input::variable() -> void
 {
 }
 

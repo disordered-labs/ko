@@ -20,7 +20,7 @@ class Input {
 
   public:
 
-    void file();
+    auto file() -> void;
 
   private:
 
@@ -35,19 +35,19 @@ class Input {
     int echo_console;
     int echo_logfile;
 
-    void trim_comments(std::string &);
-    void trim_whitespace(std::string &);
+    auto trim_comments(std::string &) -> void;
+    auto trim_whitespace(std::string &) -> void;
 
-    void parse(std::string &);
-    void execute_command();
+    auto parse(std::string &) -> void;
+    auto execute_command() -> void;
 
   private:
 
-    void echo();
-    void boundary();
-    void material();
-    void mesh();
-    void variable();
+    auto echo() -> void;
+    auto boundary() -> void;
+    auto material() -> void;
+    auto mesh() -> void;
+    auto variable() -> void;
 
 }; // class Input
 } // namespace KO_NS
