@@ -26,6 +26,7 @@ class KO {
 
   private:
 
+    auto create() -> void;
     auto help(std::string_view) -> void;
 
 }; // class KO
