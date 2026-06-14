@@ -1,119 +1,105 @@
-# ----- Multi-machine makefile ----------------------------------------------- #
+# Multi-machine makefile
 
-SHELL	= /bin/sh
-PYTHON	= python3
+# ---------------------------------------------------------------------------- #
+# Special variables and settings
 
-# ----- Command-line options (default values and checks) --------------------- #
+.DELETE_ON_ERROR:
 
-config	= default
-enable	= static
-prefix	= ../build/make
+.DEFAULT_GOAL := all
+.SHELLFLAGS := -eu -c
+
+SHELL := /bin/sh
+PYTHON := python3
+
+# ---------------------------------------------------------------------------- #
+# Command-line options
+
+config ?= relwithdebinfo
+enable ?= static
 
 ifeq ($(enable),static)
-OBJDIR	= Obj_$(config)
+OBJDIR := Obj_$(config)
 else ifeq ($(enable),shared)
-OBJDIR	= Obj_shared_$(config)
+OBJDIR := Obj_shared_$(config)
 else
-$(error ERROR: Invalid enable option - $(enable))
+$(error ERROR: Invalid enable option "$(enable)". Use "static" or "shared")
 endif
 
-# ----- Definitions ---------------------------------------------------------- #
+# ---------------------------------------------------------------------------- #
+# Definitions
 
-EXE	= ko
+EXE := ko
 
-ARLIB	= lib$(EXE).a
-SHLIB	= lib$(EXE).so
-LIBLINK	= -L. -l$(EXE)
+ARLIB := lib$(EXE).a
+SHLIB := lib$(EXE).so
+LIBLINK := -L. -l$(EXE)
 
-SRC	= $(wildcard *.cxx)
-OBJ	= $(patsubst %.cxx, %.o, $(SRC))
+SRC := $(wildcard *.cxx)
+OBJ := $(patsubst %.cxx, %.o, $(SRC))
 
-SRCLIB	= $(filter-out main.cxx, $(SRC))
-OBJLIB	= $(filter-out main.o, $(OBJ))
+SRCLIB := $(filter-out main.cxx, $(SRC))
+OBJLIB := $(filter-out main.o, $(OBJ))
 
-BINDIR	= $(prefix)/bin
-LIBDIR	= $(prefix)/lib
+PREFIX := ../build/make
+BINDIR := $(PREFIX)/bin
+LIBDIR := $(PREFIX)/lib
 
-TPL	= $(@:lib-%=%)
-TPLDIR	= ../lib/$(TPL)
+TPL := $(@:lib-%=%)
+TPLDIR := ../lib/$(TPL)
 
-# ----- Build the program ---------------------------------------------------- #
+# ---------------------------------------------------------------------------- #
+# Build, install, uninstall
 
-all	:
-	@ echo "Gathering build information...."
-	@ if [ ! -f "MAKE/DEFAULT/Makefile.$(config)" \
-	  -a ! -f "MAKE/OPTIONS/Makefile.$(config)" \
-	  -a ! -f "MAKE/MACHINES/Makefile.$(config)" \
-	  -a ! -f "MAKE/MINE/Makefile.$(config)" ] ; then \
-	  echo "" ; \
-	  echo "ERROR: Makefile.$(config) was not found" ; exit 1 ; \
-	fi
-	@ if [ ! -d "$(OBJDIR)" ] ; then mkdir -p "$(OBJDIR)" ; fi
-	@ if [ -f "MAKE/DEFAULT/Makefile.$(config)" ] ; \
-	  then cp "MAKE/DEFAULT/Makefile.$(config)" "$(OBJDIR)/Makefile" ; fi
-	@ if [ -f "MAKE/OPTIONS/Makefile.$(config)" ] ; \
-	  then cp "MAKE/OPTIONS/Makefile.$(config)" "$(OBJDIR)/Makefile" ; fi
-	@ if [ -f "MAKE/MACHINES/Makefile.$(config)" ] ; \
-	  then cp "MAKE/MACHINES/Makefile.$(config)" "$(OBJDIR)/Makefile" ; fi
-	@ if [ -f "MAKE/MINE/Makefile.$(config)" ] ; \
-	  then cp "MAKE/MINE/Makefile.$(config)" "$(OBJDIR)/Makefile" ; fi
+.PHONY: all
+all:
+	@ echo "Gathering build information..."
+	@ dirs="MAKE/CUSTOM MAKE/MACHINES MAKE/OPTIONS" ; \
+	  found="" ; \
+	  for d in $$dirs ; do \
+	    if [ -f "$$d/Makefile.$(config)" ] ; then \
+	      found="$$d/Makefile.$(config)" ; \
+	      break ; \
+	    fi ; \
+	  done ; \
+	  if [ -z "$$found" ] ; then \
+	    echo "" ; \
+	    echo "ERROR: Makefile.$(config) was not found" \
+	         "in MAKE/{CUSTOM,MACHINES,OPTIONS}" ; \
+	    exit 1 ; \
+	  fi ; \
+	  mkdir -p "$(OBJDIR)" ; \
+	  { echo "include ../$$found" ; \
+	  } > "$(OBJDIR)/Makefile"
 ifeq ($(enable),static)
 	@ echo ""
 	@ echo "Building static library:"
-	@ cd "$(OBJDIR)" && \
-	  $(MAKE) $(MAKEFLAGS) "OBJ = $(OBJLIB)" \
+	@ $(MAKE) -C "$(OBJDIR)" \
+	  "OBJ = $(OBJLIB)" \
 	  "SHLIB =" "SHFLAGS =" "SHLIBFLAGS =" "RPATH_NAME =" "RPATH_DIRS =" \
 	  "ARLIB = $(ARLIB)" $(ARLIB)
 	@ echo ""
 	@ echo "Linking executable:"
-	@ cd "$(OBJDIR)" && \
-	  $(MAKE) $(MAKEFLAGS) "OBJ = main.o" \
+	@ $(MAKE) -C "$(OBJDIR)" \
+	  "OBJ = main.o" \
 	  "SHLIB =" "SHFLAGS =" "SHLIBFLAGS =" "RPATH_NAME =" "RPATH_DIRS =" \
 	  "LIB = $(ARLIB)" "LIBLINK = $(LIBLINK)" "EXE = $(EXE)" $(EXE)
 else ifeq ($(enable),shared)
 	@ echo ""
 	@ echo "Building shared library:"
-	@ cd "$(OBJDIR)" && \
-	  $(MAKE) $(MAKEFLAGS) "OBJ = $(OBJLIB)" \
+	@ $(MAKE) -C "$(OBJDIR)" \
+	  "OBJ = $(OBJLIB)" \
 	  "ARLIB =" "AR =" "ARFLAGS =" \
 	  "SHLIB = $(SHLIB)" $(SHLIB)
 	@ echo ""
 	@ echo "Linking executable:"
-	@ cd "$(OBJDIR)" && \
-	  $(MAKE) $(MAKEFLAGS) "OBJ = main.o" \
+	@ $(MAKE) -C "$(OBJDIR)" \
+	  "OBJ = main.o" \
 	  "ARLIB =" "AR =" "ARFLAGS =" \
 	  "LIB = $(SHLIB)" "LIBLINK = $(LIBLINK)" "EXE = $(EXE)" $(EXE)
 endif
 
-# ----- Remove files generated during the build ------------------------------ #
-
-clean	:
-	@ echo "Removing build artifacts: $(OBJDIR)"
-	@ rm -rf "$(OBJDIR)"
-
-clean-%	:
-	@ if [ "$@" = "clean-all" ] ; then \
-	  echo "Removing all build artifacts" ; \
-	  rm -rf $(wildcard Obj_*) "$(EXE)" "$(ARLIB)" "$(SHLIB)" ; \
-	else \
-	  echo "ERROR: Invalid clean option - $*" ; exit 1 ; \
-	fi
-
-# ----- Generate / view reference manuals ------------------------------------ #
-
-doc-%	:
-	@ if [ "$@" = "doc-tex" ] ; then \
-	  echo "ERROR: doc-tex not implemented" ; exit 1 ; \
-	elif [ "$@" = "doc-man" ] ; then \
-	  echo "Loading the man page" ; sleep 1 ; \
-	  man ../doc/man/ko.1 ; \
-	else \
-	  echo "ERROR: Invalid doc option - $*" ; exit 1 ; \
-	fi
-
-# ----- Build the program and copy files to a location for use --------------- #
-
-install	: all
+.PHONY: install
+install: all
 	@ mkdir -p "$(BINDIR)" "$(LIBDIR)"
 ifeq ($(enable),static)
 	@ echo ""
@@ -129,10 +115,105 @@ else ifeq ($(enable),shared)
 	@ install -c "$(OBJDIR)/$(SHLIB)" "$(LIBDIR)"
 endif
 
+.PHONY: uninstall
+uninstall:
+	@ echo "Uninstalling $(EXE) from $(BINDIR)"
+	@ rm -rf -- "$(BINDIR)/$(EXE)"
+	@ echo "Uninstalling libraries from $(LIBDIR)"
+	@ rm -rf -- "$(LIBDIR)/$(ARLIB)" "$(LIBDIR)/$(SHLIB)"
 
-# ----- Build external libraries --------------------------------------------- #
+# ---------------------------------------------------------------------------- #
+# Cleanup
 
-lib-%	:
+.PHONY: clean
+clean:
+	@ echo "Removing build artifacts: $(OBJDIR)"
+	@ rm -rf -- "$(OBJDIR)"
+
+.PHONY: clean-all
+clean-all:
+	@ echo "Removing all build artifacts"
+	@ rm -rf -- $(wildcard Obj_*) "$(EXE)" "$(ARLIB)" "$(SHLIB)"
+
+.PHONY: distclean
+distclean: clean-all
+	@ echo "Removing all installed files"
+	@ rm -rf -- "$(BINDIR)/$(EXE)"
+	@ rm -rf -- "$(LIBDIR)/$(ARLIB)" "$(LIBDIR)/$(SHLIB)"
+	@ echo "Removing install directories"
+	@ rmdir "$(BINDIR)" 2>/dev/null || true
+	@ rmdir "$(LIBDIR)" 2>/dev/null || true
+
+# ---------------------------------------------------------------------------- #
+# Documentation
+
+.PHONY: man
+man:
+	@ echo "Loading the man page" ; sleep 1 ; man ../doc/man/ko.1
+
+.PHONY: tex
+tex:
+	@ echo "ERROR: tex documentation not implemented" ; exit 1
+
+# ---------------------------------------------------------------------------- #
+# Packaging and distribution
+
+.PHONY: tar
+tar:
+	@ echo "Creating ../$(EXE)_src.tar.gz"
+	@ tar -czf "../$(EXE)_src.tar.gz" -C ".." \
+	  --exclude="src/Obj_*" \
+	  --exclude="src/$(EXE)" \
+	  --exclude="src/$(ARLIB)" \
+	  --exclude="src/$(SHLIB)" \
+	  "src"
+
+# ---------------------------------------------------------------------------- #
+# Help and utilities
+
+.PHONY: help
+help:
+	@ echo "A short multi-machine build system how-to"
+	@ echo ""
+	@ echo "General usage from inside src:"
+	@ echo ""
+	@ echo "  make [TARGET] [config=CONFIG] [enable=static|shared]"
+	@ echo ""
+	@ echo "Targets:"
+	@ echo ""
+	@ echo "  all                    build the program (default)"
+	@ echo "  install                build and install to prefix"
+	@ echo "  uninstall              remove installed files from prefix"
+	@ echo ""
+	@ echo "  clean                  delete Obj_<config> build artifacts"
+	@ echo "  clean-all              delete all Obj_* build artifacts"
+	@ echo "  distclean              clean-all + uninstall + remove prefix"
+	@ echo ""
+	@ echo "  man                    view the man page (../doc/man/ko.1)"
+	@ echo "  tex                    create latex documentation (not yet implemented)"
+	@ echo ""
+	@ echo "  tar                    create ../<exe>_src.tar.gz of src/ only"
+	@ echo ""
+	@ echo "  lib-all [args=...]     download/build/install all packages in ../lib"
+	@ echo "  lib-<name> [args=...]  download/build/install <name> from ../lib"
+	@ echo ""
+	@ echo "Options:"
+	@ echo ""
+	@ echo "  config=CONFIG          build configuration (default: relwithdebinfo)"
+	@ echo "  enable=MODE            static (default) or shared"
+	@ echo ""
+	@ echo "Available build configurations:"
+	@ for d in MAKE/CUSTOM MAKE/MACHINES MAKE/OPTIONS ; do \
+	  if ls "$$d"/Makefile.* 2>/dev/null >/dev/null 2>&1 ; then \
+	  printf "\n  From %s:\n\n" "$$d" ; \
+	  for f in "$$d"/Makefile.* ; do \
+	    desc=$$(head -1 "$$f" | sed 's/^# //' || echo "No description available") ; \
+	    printf "  %s\n" "$$desc" ; \
+	  done ; \
+	  fi ; \
+	done
+
+lib-%:
 	@ if [ "$@" = "lib-all" ] ; then \
 	  for d in ../lib/* ; do \
 	    if [ -d $$d ] ; then \
@@ -152,67 +233,5 @@ lib-%	:
 	else \
 	  echo "ERROR: Invalid lib option - $(TPL)" ; exit 1 ; \
 	fi ; touch main.cxx
-
-# ----- Create a tar file of the source files -------------------------------- #
-
-tar	: clean-all
-	@ echo "Creating ../$(EXE)_src.tar.gz"
-	@ tar -czf "../$(EXE)_src.tar.gz" -C ".." "src"
-
-# ----- Brief help message --------------------------------------------------- #
-
-help	:
-	@ echo "Execute any of the following commands from within the src directory:"
-	@ echo ""
-	@ echo "make [all]                   build the program with default settings"
-	@ echo "make [all] [config=CONFIG]   build the program using CONFIG"
-	@ echo "make install [config=CONFIG] build and install the program using CONFIG"
-	@ echo ""
-	@ echo "make clean [config=CONFIG]   delete build artifacts for CONFIG"
-	@ echo "make clean-all               delete all build artifacts"
-	@ echo ""
-	@ echo "make doc-tex                 create the latex documentation"
-	@ echo "make doc-man                 show the man page"
-	@ echo ""
-	@ echo "make lib-package             print the help message for package in ../lib"
-	@ echo "make lib-package args=\"...\"  download/build/install package in ../lib"
-	@ echo "make lib-all args=\"...\"      download/build/install all packages in ../lib"
-	@ echo ""
-	@ echo "make tar                     create a tar file of the source files"
-	@ echo ""
-	@ echo "CONFIG (default: config=default) is this option from src/MAKE/DEFAULT:"
-	@ echo ""
-	@ files=$$(ls MAKE/DEFAULT/Makefile.* 2>/dev/null) ; \
-	  for file in $$files ; do head -1 $$file ; done
-	@ echo ""
-	@ echo "... or one of these options from from src/MAKE/OPTIONS:"
-	@ echo ""
-	@ files=$$(ls MAKE/OPTIONS/Makefile.* 2>/dev/null) ; \
-	  for file in $$files ; do head -1 $$file ; done
-	@ echo ""
-	@ echo "... or one of these options from src/MAKE/MACHINES:"
-	@ echo ""
-	@ files=$$(ls MAKE/MACHINES/Makefile.* 2>/dev/null) ; \
-	  for file in $$files ; do head -1 $$file ; done
-	@ echo ""
-	@ echo "... or one of these options from src/MAKE/MINE:"
-	@ echo ""
-	@ files=$$(ls MAKE/MINE/Makefile.* 2>/dev/null) ; \
-	  for file in $$files ; do head -1 $$file ; done
-	@ echo ""
-	@ echo "... or a new Makefile.config can be created and placed in src/MAKE/MINE for use"
-
-# ----- Developer / maintainer tools ----------------------------------------- #
-
-check	?=
-fix	?=
-
-format	:
-ifneq ($(check),)
-	@ clang-format --verbose --style=file $(check)
-endif
-ifneq ($(fix),)
-	@ clang-format --verbose --style=file -i $(fix)
-endif
 
 # ----- End of the makefile -------------------------------------------------- #
