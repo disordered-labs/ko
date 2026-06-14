@@ -34,18 +34,15 @@ ARLIB := lib$(EXE).a
 SHLIB := lib$(EXE).so
 LIBLINK := -L. -l$(EXE)
 
+PREFIX := ../build/make
+BINDIR := $(PREFIX)/bin
+LIBDIR := $(PREFIX)/lib
+
 SRC := $(wildcard *.cxx)
 OBJ := $(patsubst %.cxx, %.o, $(SRC))
 
 SRCLIB := $(filter-out main.cxx, $(SRC))
 OBJLIB := $(filter-out main.o, $(OBJ))
-
-PREFIX := ../build/make
-BINDIR := $(PREFIX)/bin
-LIBDIR := $(PREFIX)/lib
-
-TPL := $(@:lib-%=%)
-TPLDIR := ../lib/$(TPL)
 
 # ---------------------------------------------------------------------------- #
 # Build, install, uninstall
@@ -169,6 +166,30 @@ tar:
 	  "src"
 
 # ---------------------------------------------------------------------------- #
+# Third-party libraries
+
+.PHONY: lib-%
+lib-%:
+	@ pkg="$(@:lib-%=%)" ; \
+	  if [ "$$pkg" = "all" ] ; then \
+	    if [ ! -d "../lib" ] ; then \
+	      echo "ERROR: ../lib does not exist" ; exit 1 ; \
+	    fi ; \
+	    for d in ../lib/*/ ; do \
+	      [ -f "$${d}Install.py" ] || continue ; \
+	      ( cd "$$d" && "$(PYTHON)" "Install.py" $(args) ) || exit 1 ; \
+	    done ; \
+	  elif [ -d "../lib/$$pkg" ] ; then \
+	    if [ -f "../lib/$$pkg/Install.py" ] ; then \
+	      ( cd "../lib/$$pkg" && "$(PYTHON)" "Install.py" $(args) ) ; \
+	    else \
+	      echo "ERROR: Install.py not found in ../lib/$$pkg" ; exit 1 ; \
+	    fi ; \
+	  else \
+	    echo "ERROR: Invalid lib option - $$pkg" ; exit 1 ; \
+	  fi
+
+# ---------------------------------------------------------------------------- #
 # Help and utilities
 
 .PHONY: help
@@ -204,34 +225,13 @@ help:
 	@ echo ""
 	@ echo "Available build configurations:"
 	@ for d in MAKE/CUSTOM MAKE/MACHINES MAKE/OPTIONS ; do \
-	  if ls "$$d"/Makefile.* 2>/dev/null >/dev/null 2>&1 ; then \
-	  printf "\n  From %s:\n\n" "$$d" ; \
-	  for f in "$$d"/Makefile.* ; do \
-	    desc=$$(head -1 "$$f" | sed 's/^# //' || echo "No description available") ; \
-	    printf "  %s\n" "$$desc" ; \
-	  done ; \
-	  fi ; \
-	done
-
-lib-%:
-	@ if [ "$@" = "lib-all" ] ; then \
-	  for d in ../lib/* ; do \
-	    if [ -d $$d ] ; then \
-	      if [ -f $$d/Install.py ] ; then \
-	        ( cd $$d && "$(PYTHON)" "Install.py" $(args) ) || exit 1 ; \
-	      else \
-	        echo "ERROR: Install.py does not exist in $$d" ; exit 1 ; \
-	      fi ; \
+	    if ls "$$d"/Makefile.* 2>/dev/null >/dev/null 2>&1 ; then \
+	      printf "\n  From %s:\n\n" "$$d" ; \
+	      for f in "$$d"/Makefile.* ; do \
+	        desc=$$(head -1 "$$f" | sed 's/^# //' || echo "No description available") ; \
+	        printf "  %s\n" "$$desc" ; \
+	      done ; \
 	    fi ; \
-	  done ; \
-	elif [ -d "$(TPLDIR)" ] ; then \
-	  if [ -f "$(TPLDIR)/Install.py" ] ; then \
-	    ( cd "$(TPLDIR)" && "$(PYTHON)" "Install.py" $(args) ) || exit 1 ; \
-	  else \
-	    echo "ERROR: Install.py does not exist in $(TPLDIR)" ;  exit 1 ; \
-	  fi ; \
-	else \
-	  echo "ERROR: Invalid lib option - $(TPL)" ; exit 1 ; \
-	fi ; touch main.cxx
+	  done
 
 # ----- End of the makefile -------------------------------------------------- #
