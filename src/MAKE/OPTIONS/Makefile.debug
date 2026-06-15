@@ -3,10 +3,10 @@
 # ---------------------------------------------------------------------------- #
 # compiler/linker/library settings
 
-CPPFLAGS = -MD -DDEBUG -Wall -Wextra
+CPPFLAGS = -MD -DDEBUG
 
 CXX = g++
-CXXFLAGS = -std=c++23 -O0 -g
+CXXFLAGS = -std=c++23 -O0 -g -Wall -Wextra
 
 LD = $(CXX)
 LDFLAGS = $(CXXFLAGS)
