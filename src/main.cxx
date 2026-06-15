@@ -17,14 +17,17 @@ using namespace KO_NS;
 
 // -------------------------------------------------------------------------- //
 
-auto main(int argc, char **argv) -> int
+auto main(int argc, char **argv) noexcept -> int
 {
   try {
     auto ko = std::make_unique<KO>(argc, argv);
     ko->input->file();
     return EXIT_SUCCESS;
-  } catch (std::exception &mesg) {
-    std::print(stdout, "\nERROR: The following exception has occured\n{}\n", mesg.what());
+  } catch (const std::exception &mesg) {
+    std::print(stderr, "\nERROR: The following exception has occurred\n{}\n", mesg.what());
+    return EXIT_FAILURE;
+  } catch (...) {
+    std::print(stderr, "\nERROR: An unknown exception has occurred.\n");
     return EXIT_FAILURE;
   }
 }
