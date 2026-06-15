@@ -24,7 +24,7 @@ auto main(int argc, char **argv) noexcept -> int
     ko->input->file();
     return EXIT_SUCCESS;
   } catch (const std::exception &mesg) {
-    std::print(stderr, "\nERROR: The following exception has occurred\n{}\n", mesg.what());
+    std::print(stderr, "\nERROR: {}\n", mesg.what());
     return EXIT_FAILURE;
   } catch (...) {
     std::print(stderr, "\nERROR: An unknown exception has occurred.\n");
