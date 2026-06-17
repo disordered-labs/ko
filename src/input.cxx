@@ -30,7 +30,7 @@ using namespace KO_NS;
 
 // -------------------------------------------------------------------------- //
 
-Input::Input(int argc, char **argv)
+Input::Input(KO *ko, int argc, char **argv) : Pointers(ko)
 {
   std::string option;
   int iarg, shift;

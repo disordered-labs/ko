@@ -32,7 +32,7 @@ using namespace KO_NS;
 
 // -------------------------------------------------------------------------- //
 
-Universe::Universe()
+Universe::Universe(KO *ko) : Pointers(ko)
 {
   // Default output file handles
 

@@ -7,16 +7,18 @@
 #ifndef INPUT_H
 #define INPUT_H
 
+#include "pointers.h"
+
 #include <string>
 #include <vector>
 
 namespace KO_NS {
 
-class Input {
+class Input : protected Pointers {
 
   public:
 
-    Input(int, char **);
+    Input(class KO *, int, char **);
 
   public:
 

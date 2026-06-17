@@ -7,17 +7,18 @@
 #ifndef ERROR_H
 #define ERROR_H
 
-#include <memory>
+#include "pointers.h"
+
 #include <string>
 #include <string_view>
 
 namespace KO_NS {
 
-class Error {
+class Error : protected Pointers {
 
   public:
 
-    Error();
+    Error(class KO *);
 
   public:
 
@@ -34,7 +35,6 @@ class Error {
     auto basename(std::string_view) -> std::string_view;
 
 }; // class Error
-inline std::unique_ptr<Error> error;
 } // namespace KO_NS
 
 #endif

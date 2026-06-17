@@ -17,11 +17,11 @@ using namespace KO_NS;
 
 // -------------------------------------------------------------------------- //
 
-auto main(int argc, char **argv) noexcept -> int
+auto main(int argc, char **argv) -> int
 {
   try {
     auto ko = std::make_unique<KO>(argc, argv);
-    ko->input->file();
+    ko->run();
     return EXIT_SUCCESS;
   } catch (const std::exception &mesg) {
     std::print(stderr, "\nERROR: {}\n", mesg.what());

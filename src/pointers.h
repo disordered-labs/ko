@@ -4,28 +4,34 @@
    See the README file in the top-level directory.
 ----------------------------------------------------------------------------- */
 
-#ifndef MEMORY_H
-#define MEMORY_H
+#ifndef POINTERS_H
+#define POINTERS_H
 
-#include "pointers.h"
+#include "ko.h"
+#include "macros.h"
 
 namespace KO_NS {
 
-class Memory : protected Pointers {
+class Pointers {
 
   public:
 
-    Memory(class KO *);
+    Pointers(KO *ptr) :
+      ko(ptr),
+      memory(ptr->memory),
+      error(ptr->error),
+      universe(ptr->universe),
+      input(ptr->input) {}
 
-  public:
+  protected:
 
-    // ...
+    KO *ko;
+    Memory *&memory;
+    Error *&error;
+    Universe *&universe;
+    Input *&input;
 
-  private:
-
-    // ...
-
-}; // class Memory
+}; // class POINTERS
 } // namespace KO_NS
 
 #endif

@@ -7,6 +7,7 @@
 #include "ko.h"
 
 #include "error.h"
+#include "input.h"
 #include "macros.h"
 #include "memory.h"
 #include "universe.h"
@@ -42,9 +43,9 @@ KO::KO(int argc, char **argv)
 
   // Initialize fundamental classes
 
-  memory = std::make_unique<Memory>();
-  error = std::make_unique<Error>();
-  universe = std::make_unique<Universe>();
+  memory = new Memory(this);
+  error = new Error(this);
+  universe = new Universe(this);
 
   // Process command-line arguments with error checking
 
@@ -114,7 +115,7 @@ KO::KO(int argc, char **argv)
   if (!input_flag && !help_flag) {
     error->fatal(FLERR, "The --input command-line option was not found");
   } else {
-    input = std::make_unique<Input>(argc, argv);
+    input = new Input(this, argc, argv);
   }
 
   // Startup information to console and logfile
@@ -141,11 +142,28 @@ KO::KO(int argc, char **argv)
 
 // -------------------------------------------------------------------------- //
 
+KO::~KO()
+{
+  delete input;
+  delete universe;
+  delete error;
+  delete memory;
+}
+
+// -------------------------------------------------------------------------- //
+
 
 /* --------------------------------------------------------------------------
    Public functions
    -------------------------------------------------------------------------- */
 
+
+// -------------------------------------------------------------------------- //
+
+auto KO::run() -> void
+{
+  input->file();
+}
 
 // -------------------------------------------------------------------------- //
 

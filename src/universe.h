@@ -7,17 +7,18 @@
 #ifndef UNIVERSE_H
 #define UNIVERSE_H
 
+#include "pointers.h"
+
 #include <cstdio>
-#include <memory>
 #include <string>
 
 namespace KO_NS {
 
-class Universe {
+class Universe : protected Pointers {
 
   public:
 
-    Universe();
+    Universe(class KO *);
 
   public:
 
@@ -35,7 +36,6 @@ class Universe {
     int omp_num_threads;
 
 }; // class Universe
-inline std::unique_ptr<Universe> universe;
 } // namespace KO_NS
 
 #endif

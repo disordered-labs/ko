@@ -7,22 +7,28 @@
 #ifndef KO_H
 #define KO_H
 
-#include "input.h"
-
 #include <memory>
 #include <string_view>
 
 namespace KO_NS {
 
+class Memory;
+
 class KO {
 
   public:
 
-    std::unique_ptr<Input> input;
+    class Memory *memory;
+    class Error *error;
+    class Universe *universe;
+    class Input *input;
 
   public:
 
     KO(int, char **);
+    ~KO();
+
+    auto run() -> void;
 
   private:
 
