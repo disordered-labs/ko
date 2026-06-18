@@ -7,7 +7,6 @@
 #ifndef KO_H
 #define KO_H
 
-#include <memory>
 #include <string_view>
 
 namespace KO_NS {

@@ -15,7 +15,6 @@
 
 #include <cstdlib>
 #include <format>
-#include <memory>
 #include <print>
 #include <string>
 #include <string_view>
@@ -34,7 +33,8 @@ using namespace KO_NS;
 
 // -------------------------------------------------------------------------- //
 
-KO::KO(int argc, char **argv)
+KO::KO(int argc, char **argv) :
+  memory(nullptr), error(nullptr), universe(nullptr), input(nullptr)
 {
   std::string message;
   std::string_view option;
