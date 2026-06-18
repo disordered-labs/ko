@@ -31,6 +31,8 @@ class Universe : protected Pointers {
     auto console() const -> FILE * { return _console; }
     auto logfile() const -> FILE * { return _logfile; }
 
+    auto omp_num_threads() const -> int { return _omp_num_threads; }
+
   private:
 
     FILE *_console;

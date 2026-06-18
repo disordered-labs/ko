@@ -32,7 +32,8 @@ using namespace KO_NS;
 
 // -------------------------------------------------------------------------- //
 
-Universe::Universe(KO *ko) : Pointers(ko), _console(stdout), _logfile(nullptr)
+Universe::Universe(KO *ko) : Pointers(ko),
+  _console(stdout), _logfile(nullptr), _omp_num_threads(0)
 {
   // Initialize the use of OMP THREADS
 
@@ -43,8 +44,6 @@ Universe::Universe(KO *ko) : Pointers(ko), _console(stdout), _logfile(nullptr)
     _omp_num_threads = omp_get_max_threads();
   }
   omp_set_num_threads(_omp_num_threads);
-#else
-  _omp_num_threads = 0;
 #endif
 }
 
