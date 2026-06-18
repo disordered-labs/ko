@@ -103,13 +103,13 @@ KO::KO(int argc, char **argv) :
   if (console_flag) {
     universe->set_console(argv[console_flag]);
   } else {
-    universe->set_console(universe->console_default);
+    universe->set_console();
   }
 
   if (logfile_flag) {
     universe->set_logfile(argv[logfile_flag]);
   } else {
-    universe->set_logfile(universe->logfile_default);
+    universe->set_logfile();
   }
 
   if (!input_flag && !help_flag) {
@@ -122,12 +122,12 @@ KO::KO(int argc, char **argv) :
 
   message = std::format("KO ({})\n", KO_VERSION);
 
-  if (universe->console) {
-    std::print(universe->console, "{}", message);
+  if (universe->console()) {
+    std::print(universe->console(), "{}", message);
   }
 
-  if (universe->logfile) {
-    std::print(universe->logfile, "{}", message);
+  if (universe->logfile()) {
+    std::print(universe->logfile(), "{}", message);
   }
 
   // If help_flag is set, print help message and exit with success status
@@ -197,8 +197,8 @@ auto KO::help(std::string_view exename) -> void
   "  -l, --logfile <none/filename>           : where to send logfile output (default: ko.log)\n"
   "\n", exename);
 
-  if (universe->console) {
-    std::print(universe->console, "{}", message);
+  if (universe->console()) {
+    std::print(universe->console(), "{}", message);
   }
 }
 

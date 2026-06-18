@@ -22,18 +22,21 @@ class Universe : protected Pointers {
 
   public:
 
-    std::string console_default;
-    std::string logfile_default;
-
-    FILE *console;
-    FILE *logfile;
-
+    auto set_console() -> void;
     auto set_console(std::string) -> void;
+
+    auto set_logfile() -> void;
     auto set_logfile(std::string) -> void;
+
+    auto console() const -> FILE * { return _console; }
+    auto logfile() const -> FILE * { return _logfile; }
 
   private:
 
-    int omp_num_threads;
+    FILE *_console;
+    FILE *_logfile;
+
+    int _omp_num_threads;
 
 }; // class Universe
 } // namespace KO_NS

@@ -44,11 +44,11 @@ Error::Error(KO *ko) : Pointers(ko), numwarn(0), maxwarn(100) {}
 
 auto Error::done(int status) -> void
 {
-  if ((universe->console) && (universe->console != stdout)) {
-    fclose(universe->console);
+  if (universe->console() && universe->console() != stdout) {
+    fclose(universe->console());
   }
-  if (universe->logfile) {
-    fclose(universe->logfile);
+  if (universe->logfile()) {
+    fclose(universe->logfile());
   }
   std::exit(status);
 }
@@ -60,15 +60,15 @@ auto Error::fatal(std::string_view path, int line, std::string_view memo) -> voi
   std::string message = std::format("\nERROR: {} ({}:{})\n",
                                     memo, basename(path), line);
 
-  if (universe->console) {
-    std::print(universe->console, "{}", message);
-    if (universe->console != stdout) {
-      fclose(universe->console);
+  if (universe->console()) {
+    std::print(universe->console(), "{}", message);
+    if (universe->console() != stdout) {
+      fclose(universe->console());
     }
   }
-  if (universe->logfile) {
-    std::print(universe->logfile, "{}", message);
-    fclose(universe->logfile);
+  if (universe->logfile()) {
+    std::print(universe->logfile(), "{}", message);
+    fclose(universe->logfile());
   }
   std::exit(EXIT_FAILURE);
 }
@@ -85,21 +85,21 @@ auto Error::warn(std::string_view path, int line, std::string_view memo) -> void
   std::string message = std::format("WARNING: {} ({}:{})\n",
                                     memo, basename(path), line);
 
-  if (universe->console) {
-    std::print(universe->console, "{}", message);
+  if (universe->console()) {
+    std::print(universe->console(), "{}", message);
   }
-  if (universe->logfile) {
-    std::print(universe->logfile, "{}", message);
+  if (universe->logfile()) {
+    std::print(universe->logfile(), "{}", message);
   }
 
   if ((maxwarn > 0) && (numwarn == maxwarn)) {
     std::string note = "WARNING: Maximum warning count reached. "
                        "Further warnings will be suppressed.\n";
-    if (universe->console) {
-      std::print(universe->console, "{}", note);
+    if (universe->console()) {
+      std::print(universe->console(), "{}", note);
     }
-    if (universe->logfile) {
-      std::print(universe->logfile, "{}", note);
+    if (universe->logfile()) {
+      std::print(universe->logfile(), "{}", note);
     }
   }
 }

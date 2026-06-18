@@ -109,12 +109,12 @@ auto Input::file() -> void
 
     // Echo the line
 
-    if (echo_console && universe->console) {
-      std::print(universe->console, "{}\n", line);
+    if (echo_console && universe->console()) {
+      std::print(universe->console(), "{}\n", line);
     }
 
-    if (echo_logfile && universe->logfile) {
-      std::print(universe->logfile, "{}\n", line);
+    if (echo_logfile && universe->logfile()) {
+      std::print(universe->logfile(), "{}\n", line);
     }
 
     // Parse the line, skip to the next line if empty

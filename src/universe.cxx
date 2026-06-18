@@ -32,29 +32,19 @@ using namespace KO_NS;
 
 // -------------------------------------------------------------------------- //
 
-Universe::Universe(KO *ko) : Pointers(ko)
+Universe::Universe(KO *ko) : Pointers(ko), _console(stdout), _logfile(nullptr)
 {
-  // Default output file handles
-
-  console_default = "stdout";
-  logfile_default = "ko.log";
-
-  // Initialize output file handles
-
-  console = stdout;
-  logfile = nullptr;
-
   // Initialize the use of OMP THREADS
 
 #if defined(_OPENMP)
   if (getenv("OMP_NUM_THREADS") == nullptr) {
-    omp_num_threads = 1;
+    _omp_num_threads = 1;
   } else {
-    omp_num_threads = omp_get_max_threads();
+    _omp_num_threads = omp_get_max_threads();
   }
-  omp_set_num_threads(omp_num_threads);
+  omp_set_num_threads(_omp_num_threads);
 #else
-  omp_num_threads = 0;
+  _omp_num_threads = 0;
 #endif
 }
 
@@ -68,19 +58,32 @@ Universe::Universe(KO *ko) : Pointers(ko)
 
 // -------------------------------------------------------------------------- //
 
+auto Universe::set_console() -> void
+{
+  _console = stdout;
+}
+
+// -------------------------------------------------------------------------- //
+
 auto Universe::set_console(std::string value) -> void
 {
-  if (value == console_default) {
-    console = stdout;
+  if (value == "none") {
+    _console = nullptr;
   } else {
-    if (value == "none") {
-      console = nullptr;
-    } else {
-      console = fopen(value.c_str(), "w");
-      if (console == nullptr) {
-        error->fatal(FLERR, std::format("Could not open the console {}", value));
-      }
+    _console = fopen(value.c_str(), "w");
+    if (_console == nullptr) {
+      error->fatal(FLERR, std::format("Could not open the console {}", value));
     }
+  }
+}
+
+// -------------------------------------------------------------------------- //
+
+auto Universe::set_logfile() -> void
+{
+  _logfile = fopen("ko.log", "w");
+  if (_logfile == nullptr) {
+    error->fatal(FLERR, "Could not open the default logfile ko.log");
   }
 }
 
@@ -88,19 +91,12 @@ auto Universe::set_console(std::string value) -> void
 
 auto Universe::set_logfile(std::string value) -> void
 {
-  if (value == logfile_default) {
-    logfile = fopen(value.c_str(), "w");
-    if (logfile == nullptr) {
-      error->fatal(FLERR, std::format("Could not open the log file {}", value));
-    }
+  if (value == "none") {
+    _logfile = nullptr;
   } else {
-    if (value == "none") {
-      logfile = nullptr;
-    } else {
-      logfile = fopen(value.c_str(), "w");
-      if (logfile == nullptr) {
-        error->fatal(FLERR, std::format("Could not open the log file {}", value));
-      }
+    _logfile = fopen(value.c_str(), "w");
+    if (_logfile == nullptr) {
+      error->fatal(FLERR, std::format("Could not open the log file {}", value));
     }
   }
 }
