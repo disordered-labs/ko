@@ -12,8 +12,6 @@
 
 namespace KO_NS {
 
-class Memory;
-
 class KO {
 
   public:
@@ -27,6 +25,14 @@ class KO {
 
     KO(int, char **);
     ~KO();
+
+    KO() = delete;
+    KO(const KO &) = delete;
+    KO(KO &&) = delete;
+    KO &operator=(const KO &) = delete;
+    KO &operator=(KO &&) = delete;
+
+  public:
 
     auto run() -> void;
 

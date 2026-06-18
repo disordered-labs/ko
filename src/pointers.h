@@ -8,7 +8,6 @@
 #define POINTERS_H
 
 #include "ko.h"
-#include "macros.h"
 
 namespace KO_NS {
 
@@ -23,6 +22,12 @@ class Pointers {
       universe(ptr->universe),
       input(ptr->input) {}
 
+    Pointers() = delete;
+    Pointers(const Pointers &) = default;
+    Pointers(Pointers &&) = delete;
+    Pointers &operator=(const Pointers &) = delete;
+    Pointers &operator=(Pointers &&) = delete;
+
   protected:
 
     KO *ko;
@@ -31,7 +36,7 @@ class Pointers {
     Universe *&universe;
     Input *&input;
 
-}; // class POINTERS
+}; // class Pointers
 } // namespace KO_NS
 
 #endif
