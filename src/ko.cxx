@@ -6,15 +6,16 @@
 
 #include "ko.h"
 
+#include "array.h"
 #include "error.h"
 #include "input.h"
 #include "macros.h"
-#include "memory.h"
 #include "universe.h"
 #include "version.h"
 
 #include <cstdlib>
 #include <format>
+#include <memory>
 #include <print>
 #include <string>
 #include <string_view>
@@ -34,7 +35,7 @@ using namespace KO_NS;
 // -------------------------------------------------------------------------- //
 
 KO::KO(int argc, char **argv) :
-  memory(nullptr), error(nullptr), universe(nullptr), input(nullptr)
+  error(nullptr), universe(nullptr), input(nullptr)
 {
   std::string message;
   std::string_view option;
@@ -43,7 +44,6 @@ KO::KO(int argc, char **argv) :
 
   // Initialize fundamental classes
 
-  memory = new Memory(this);
   error = new Error(this);
   universe = new Universe(this);
 
@@ -147,7 +147,6 @@ KO::~KO()
   delete input;
   delete universe;
   delete error;
-  delete memory;
 }
 
 // -------------------------------------------------------------------------- //

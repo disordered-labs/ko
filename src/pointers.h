@@ -17,7 +17,6 @@ class Pointers {
 
     Pointers(KO *ptr) :
       ko(ptr),
-      memory(ptr->memory),
       error(ptr->error),
       universe(ptr->universe),
       input(ptr->input) {}
@@ -31,7 +30,7 @@ class Pointers {
   protected:
 
     KO *ko;
-    Memory *&memory;
+
     Error *&error;
     Universe *&universe;
     Input *&input;
